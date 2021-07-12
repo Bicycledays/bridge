@@ -43,6 +43,7 @@ func listen(s *serial.Port) {
 		}
 
 		if n > 0 {
+			fmt.Println("n > 0")
 
 			for i, elem := range buf {
 
