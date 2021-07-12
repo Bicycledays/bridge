@@ -8,9 +8,13 @@ package main
 */
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/tarm/serial"
 	"log"
+	"net/http"
+	"strings"
 )
 
 func main() {
@@ -24,16 +28,19 @@ func main() {
 	}
 
 	s, err := serial.OpenPort(c)
+	ch := make(chan string)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	listen(s)
+	listen(s, ch)
 }
 
-func listen(s *serial.Port) {
+func listen(s *serial.Port, ch chan string) {
+
 	buf := make([]byte, 1024)
+	var measure []string
 
 	for {
 		n, err := s.Read(buf)
@@ -45,10 +52,33 @@ func listen(s *serial.Port) {
 
 		if n > 0 {
 			fmt.Print(buf[:n])
+			measure = append(measure, string(buf[:n]...))
 
 			if buf[0] == 67 {
+				ch <- strings.Join(measure, "")
 				fmt.Println("")
 			}
 		}
 	}
+}
+
+func sendMeasure(measure string) {
+
+	body := map[string]string{"measure": measure}
+	jsonData, err := json.Marshal(body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp, err := http.Post("http://localhost:8000/post", "application/json",
+		bytes.NewBuffer(jsonData))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var res map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&res)
+	fmt.Println(res["json"])
 }
