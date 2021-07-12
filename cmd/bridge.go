@@ -41,20 +41,14 @@ func listen(s *serial.Port) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		//log.Printf("%q", buf[:n])
 
 		if n > 0 {
-			fmt.Println("n > 0")
+			fmt.Print(buf[:n])
 
-			for i, elem := range buf {
-
-				if i == n-1 {
-					fmt.Println(elem)
-					break
-				}
-
-				fmt.Printf("%q", elem)
+			if buf[0] == 67 {
+				fmt.Println("")
 			}
-			//log.Printf("%q", buf[:n])
 		}
 	}
 }
