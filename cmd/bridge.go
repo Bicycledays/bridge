@@ -8,6 +8,7 @@ package main
 */
 
 import (
+	"fmt"
 	"github.com/tarm/serial"
 	"log"
 )
@@ -42,7 +43,17 @@ func listen(s *serial.Port) {
 		}
 
 		if n > 0 {
-			log.Printf("%q", buf[:n])
+
+			for i, elem := range buf {
+
+				if i == n-1 {
+					fmt.Println(elem)
+					break
+				}
+
+				fmt.Printf("%q", elem)
+			}
+			//log.Printf("%q", buf[:n])
 		}
 	}
 }
