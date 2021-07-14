@@ -11,11 +11,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/tarm/serial"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
+
+func init() {
+	// loads values from .env into the system
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+}
 
 func main() {
 
@@ -55,7 +64,8 @@ func listen(s *serial.Port, ch chan string) {
 			measure = append(measure, string(buf[:n]...))
 
 			if buf[0] == 67 {
-				ch <- strings.Join(measure, "")
+				//ch <- strings.Join(measure, "")
+				sendMeasure(strings.Join(measure, ""))
 				fmt.Println("")
 			}
 		}
@@ -63,22 +73,27 @@ func listen(s *serial.Port, ch chan string) {
 }
 
 func sendMeasure(measure string) {
+	url, exists := os.LookupEnv("URL")
 
-	body := map[string]string{"measure": measure}
-	jsonData, err := json.Marshal(body)
+	if exists {
 
-	if err != nil {
-		log.Fatal(err)
+		body := map[string]string{"measure": measure}
+		jsonData, err := json.Marshal(body)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		resp, err := http.Post(url, "application/json",
+			bytes.NewBuffer(jsonData))
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var res map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&res)
+		fmt.Println(res["json"])
 	}
 
-	resp, err := http.Post("http://localhost:8000/post", "application/json",
-		bytes.NewBuffer(jsonData))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
-	fmt.Println(res["json"])
 }
