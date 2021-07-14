@@ -63,7 +63,7 @@ func listen(s *serial.Port, ch chan string) {
 			fmt.Print(buf[:n])
 			measure = append(measure, fmt.Sprintf("%q", buf[0]))
 
-			if buf[0] == 67 {
+			if buf[0] == 10 {
 				//ch <- strings.Join(measure, "")
 				sendMeasure(strings.Join(measure, ""))
 				fmt.Println("")
@@ -93,7 +93,7 @@ func sendMeasure(measure string) {
 
 		var res map[string]interface{}
 		json.NewDecoder(resp.Body).Decode(&res)
-		fmt.Println(res["json"])
+		fmt.Println(res["success"])
 	}
 
 }
