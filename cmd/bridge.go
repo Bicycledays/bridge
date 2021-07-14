@@ -48,7 +48,7 @@ func main() {
 
 func listen(s *serial.Port, ch chan string) {
 
-	buf := make([]byte, 1024)
+	buf := make([]byte, 1)
 	var measure []string
 
 	for {
@@ -61,7 +61,7 @@ func listen(s *serial.Port, ch chan string) {
 
 		if n > 0 {
 			fmt.Print(buf[:n])
-			measure = append(measure, string(buf[:n]...))
+			measure = append(measure, fmt.Sprintf("%q", buf[0]))
 
 			if buf[0] == 67 {
 				//ch <- strings.Join(measure, "")
