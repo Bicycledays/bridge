@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 func init() {
@@ -37,16 +38,19 @@ func main() {
 	}
 
 	s, err := serial.OpenPort(c)
-	ch := make(chan string)
+	ch := make(chan bool)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	listen(s, ch)
+	go listen(s, ch)
+	go write(s)
+
+	<-ch
 }
 
-func listen(s *serial.Port, ch chan string) {
+func listen(s *serial.Port, ch chan bool) {
 
 	buf := make([]byte, 1)
 	var measure []string
@@ -69,6 +73,26 @@ func listen(s *serial.Port, ch chan string) {
 				fmt.Println("")
 			}
 		}
+	}
+
+	ch <- true
+}
+
+func write(s *serial.Port) {
+	data := make([]byte, 20)
+	data[0] = 0x1B
+	data[1] = 0x50
+
+	for {
+		n, err := s.Write(data)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println(n)
+
+		time.Sleep(10 * time.Second)
 	}
 }
 
@@ -95,5 +119,4 @@ func sendMeasure(measure string) {
 		json.NewDecoder(resp.Body).Decode(&res)
 		fmt.Println(res["success"])
 	}
-
 }
