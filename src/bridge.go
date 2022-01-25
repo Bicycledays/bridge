@@ -84,28 +84,3 @@ func write(s *serial.Port) {
 		time.Sleep(10 * time.Second)
 	}
 }
-
-//func sendMeasure(measure string) {
-//	url, exists := os.LookupEnv("URL")
-//
-//	if exists {
-//
-//		body := map[string]string{"measure": measure}
-//		jsonData, err := json.Marshal(body)
-//
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//
-//		resp, err := http.Post(url, "application/json",
-//			bytes.NewBuffer(jsonData))
-//
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//
-//		var res map[string]interface{}
-//		json.NewDecoder(resp.Body).Decode(&res)
-//		fmt.Println(res["success"])
-//	}
-//}
