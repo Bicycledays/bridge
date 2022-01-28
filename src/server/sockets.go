@@ -1,19 +1,19 @@
-package handler
+package server
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/bicycledays/bridge/src/service"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 )
 
-const ROUTE = "/measure"
+const RouteSockets = "/measure"
 
-type Socket struct {
-	Port       string
-	Route      string
-	Comparator service.Comparator
-	Clients    []websocket.Conn
+type Sockets struct {
+	Route   string
+	Clients []websocket.Conn
 }
 
 var upgrader = websocket.Upgrader{
@@ -24,21 +24,31 @@ var upgrader = websocket.Upgrader{
 
 func reader(conn *websocket.Conn) {
 	for {
+		log.Println("1")
 		messageType, p, err := conn.ReadMessage()
+		log.Print("messageType")
+		log.Println(messageType)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 		log.Println(string(p))
-
+		var c service.Comparator
+		err = json.Unmarshal(p, &c)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		fmt.Println(*c.Config, *c.License)
 		if err := conn.WriteMessage(messageType, p); err != nil {
 			log.Println(err)
 			return
 		}
+		log.Println("4")
 	}
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
+	log.Println("end point")
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
