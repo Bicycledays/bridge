@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/tarm/serial"
 )
 
@@ -23,15 +24,19 @@ type Service struct {
 
 func NewService() *Service {
 	return &Service{
-		Scanner: NewComputer(),
+		Comparators: make(map[string]*Comparator),
+		Scanner:     NewComputer(),
 	}
 }
 
-func (s *Service) CheckComparator(c *Comparator) (portName string) {
+func (s *Service) CheckComparator(c *Comparator) (portName string, err error) {
+	if !c.isValidKey() {
+		return "", errors.New("license key is not valid")
+	}
 	portName = c.Config.Name
 	_, ok := s.Comparators[portName]
 	if !ok {
 		s.Comparators[c.Config.Name] = c
 	}
-	return portName
+	return portName, nil
 }

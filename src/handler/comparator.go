@@ -11,13 +11,20 @@ func (h *Handler) print(c *gin.Context) {
 	comparator := h.service.Comparators[portName.(string)]
 	port := comparator.OpenPort()
 
-	ch := make(chan string)
+	ch := make(chan []byte)
 	go comparator.Listen(ch, port)
-	comparator.Send(port, service.Print)
+	err := comparator.Send(port, service.Print)
+	if err != nil {
+		newErrorResponse(
+			c,
+			http.StatusInternalServerError,
+			"Ошибка при передаче команды на компаратор",
+			err.Error(),
+		)
+		return
+	}
 	measure := <-ch
-	c.JSON(http.StatusOK, map[string]string{
-		"measure": measure,
-	})
+	newResultResponse(c, map[string]string{"measure": string(measure)})
 }
 
 func (h *Handler) tare(c *gin.Context) {
@@ -25,11 +32,15 @@ func (h *Handler) tare(c *gin.Context) {
 	comparator := h.service.Comparators[portName.(string)]
 	port := comparator.OpenPort()
 
-	ch := make(chan string)
-	go comparator.Listen(ch, port)
-	comparator.Send(port, service.Tare)
-	measure := <-ch
-	c.JSON(http.StatusOK, map[string]string{
-		"measure": measure,
-	})
+	err := comparator.Send(port, service.Tare)
+	if err != nil {
+		newErrorResponse(
+			c,
+			http.StatusInternalServerError,
+			"Ошибка при передаче команды на компаратор",
+			err.Error(),
+		)
+		return
+	}
+	newResultResponse(c, nil)
 }

@@ -1,10 +1,8 @@
 package handler
 
 import (
-	"encoding/json"
 	"github.com/bicycledays/bridge/src/service"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type Handler struct {
@@ -19,6 +17,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
 	router.GET("/scan-com-ports", h.listPorts)
+	router.GET("/measure", h.measure)
 
 	api := router.Group("/api", h.comparatorIdentity)
 	{
@@ -27,17 +26,4 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	}
 
 	return router
-}
-
-func tare(w http.ResponseWriter, r *http.Request) {
-	var c service.Comparator
-	err := json.NewDecoder(r.Body).Decode(&c)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-}
-
-func checkComPorts(w http.ResponseWriter, r *http.Request) {
-
 }

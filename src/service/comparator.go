@@ -39,17 +39,18 @@ func (c *Comparator) OpenPort() *serial.Port {
 /*
 	Передача команды на компаратор
 */
-func (c *Comparator) Send(p *serial.Port, code Code) {
+func (c *Comparator) Send(p *serial.Port, code Code) error {
 	buf := make([]byte, 2)
 	buf[0] = byte(Esc)
 	buf[1] = byte(code)
 	_, err := p.Write(buf)
 	if err != nil {
-		log.Fatalln(err.Error())
+		return err
 	}
+	return nil
 }
 
-func (c *Comparator) Listen(ch chan string, p *serial.Port) {
+func (c *Comparator) Listen(ch chan []byte, p *serial.Port) {
 	buf := make([]byte, 1)
 	var measure []byte
 
@@ -60,8 +61,12 @@ func (c *Comparator) Listen(ch chan string, p *serial.Port) {
 		}
 		if buf[0] == '\n' {
 			log.Println("write inside channel")
-			ch <- string(measure)
-			measure = nil
+			select {
+			case ch <- measure:
+				measure = nil
+			default:
+				return
+			}
 		} else {
 			measure = append(measure, buf[0])
 		}
@@ -78,5 +83,6 @@ func (c *Comparator) isValidKey() bool {
 		return false
 	}
 	k := encrypt(string(js))
-	return k != c.License.Key
+	log.Println(k != c.License.Key)
+	return k == c.License.Key
 }

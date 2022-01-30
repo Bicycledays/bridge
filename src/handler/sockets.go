@@ -2,14 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/bicycledays/bridge/src/service"
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"time"
 )
-
-const RouteSockets = "/measure"
 
 type Sockets struct {
 	Route   string
@@ -22,42 +21,65 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func reader(conn *websocket.Conn) {
+func (h *Handler) measure(c *gin.Context) {
+	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "Ошибка при запуске сокетов", err.Error())
+		return
+	}
+
+	log.Println("Client Connected", c.ClientIP())
+	err = ws.WriteMessage(1, []byte("OK"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "Ошибка при ответе клиенту", err.Error())
+		return
+	}
+
+	_, message, _ := ws.ReadMessage()
+	var comparator service.Comparator
+	err = json.Unmarshal(message, &comparator)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "Ошибка парсинга параметров компаратора", err.Error())
+		return
+	}
+	_, err = h.service.CheckComparator(&comparator)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "Параметры компаратора не валидны", err.Error())
+		return
+	}
+
+	var measure []byte
+	port := comparator.OpenPort()
+	ch := make(chan []byte)
+	go comparator.Listen(ch, port)
+	go func() {
+		tick := time.NewTicker(time.Millisecond * 500)
+		defer tick.Stop()
+		for {
+
+		}
+	}()
+
 	for {
-		log.Println("1")
-		messageType, p, err := conn.ReadMessage()
-		log.Print("messageType")
-		log.Println(messageType)
+		err := comparator.Send(port, service.Print)
 		if err != nil {
-			log.Println(err)
+			newErrorResponse(
+				c,
+				http.StatusInternalServerError,
+				"Ошибка при передаче команды на компаратор",
+				err.Error(),
+			)
 			return
 		}
-		log.Println(string(p))
-		var c service.Comparator
-		err = json.Unmarshal(p, &c)
-		if err != nil {
-			log.Println(err.Error())
-		}
-		fmt.Println(*c.Config, *c.License)
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			log.Println(err)
+		measure = <-ch
+		if err := ws.WriteMessage(websocket.TextMessage, measure); err != nil {
+			newErrorResponse(
+				c,
+				http.StatusInternalServerError,
+				"Ошибка при передаче сообщения по сокетам",
+				err.Error(),
+			)
 			return
 		}
-		log.Println("4")
 	}
-}
-
-func (h *Handler) wsEndpoint(w http.ResponseWriter, r *http.Request) {
-	log.Println("end point")
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-	}
-
-	log.Println("Client Connected")
-	err = ws.WriteMessage(1, []byte("Hi Client!"))
-	if err != nil {
-		log.Println(err)
-	}
-	reader(ws)
 }
