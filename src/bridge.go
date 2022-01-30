@@ -8,7 +8,9 @@ package main
 */
 
 import (
+	"github.com/bicycledays/bridge/src/handler"
 	"github.com/bicycledays/bridge/src/server"
+	"github.com/bicycledays/bridge/src/service"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -20,13 +22,12 @@ func main() {
 	if !found {
 		port = "8080"
 	}
-	s := server.Server{Port: port}
-	go func() {
-		err := s.Run()
-		if err != nil {
-			log.Fatalln(err.Error())
-		}
-	}()
+	s := service.NewService()
+	h := handler.NewHandler(s)
+	srv := new(server.Server)
+	if err := srv.Run(port, h.InitRoutes()); err != nil {
+		log.Fatalln(err.Error())
+	}
 }
 
 func envInit() {

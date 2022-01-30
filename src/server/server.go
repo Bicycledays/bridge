@@ -1,20 +1,27 @@
 package server
 
 import (
-	"github.com/bicycledays/bridge/src/service"
-	"log"
+	"context"
 	"net/http"
+	"time"
 )
 
 type Server struct {
-	Port        string
-	Comparators map[string]service.Comparator
+	httpServer *http.Server
 }
 
-func (s *Server) Run() error {
-	http.HandleFunc(RouteSockets, wsEndpoint)
-	http.HandleFunc(RouteScanCom, checkComPorts)
+func (s *Server) Run(port string, handler http.Handler) error {
+	s.httpServer = &http.Server{
+		Addr:           ":" + port,
+		Handler:        handler,
+		MaxHeaderBytes: 1 << 20, // 1 MB
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+	}
 
-	log.Println("start server")
-	return http.ListenAndServe(":"+s.Port, nil)
+	return s.httpServer.ListenAndServe()
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }

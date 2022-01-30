@@ -7,27 +7,26 @@ import (
 )
 
 type Comparator struct {
-	Config  *serial.Config `json:"config"`
-	License *License       `json:"license"`
+	Config  *serial.Config  `json:"config"`
+	License *LicenseService `json:"license"`
 }
 
-type Route string
 type Code byte
 
 const (
-	RouteTare     Route = "/tare"
-	RoutePrint    Route = "/print"
-	RouteCover    Route = "/manage-cover"
-	RoutePlatform Route = "/manage-platform"
+	Esc      Code = 27  // ESC
+	Tare     Code = 'T' // тарирование или установка на ноль
+	Print    Code = 'P' // печать
+	Cover    Code = 'X'
+	Platform Code = 'Y'
 )
 
-const (
-	CodeEsc      Code = 27  // ESC
-	CodeTare     Code = 'T' // тарирование или установка на ноль
-	CodePrint    Code = 'P' // печать
-	CodeCover    Code = 'X'
-	CodePlatform Code = 'Y'
-)
+func NewComparator() *Comparator {
+	return &Comparator{
+		Config:  nil,
+		License: nil,
+	}
+}
 
 func (c *Comparator) OpenPort() *serial.Port {
 	p, err := serial.OpenPort(c.Config)
@@ -42,7 +41,7 @@ func (c *Comparator) OpenPort() *serial.Port {
 */
 func (c *Comparator) Send(p *serial.Port, code Code) {
 	buf := make([]byte, 2)
-	buf[0] = byte(CodeEsc)
+	buf[0] = byte(Esc)
 	buf[1] = byte(code)
 	_, err := p.Write(buf)
 	if err != nil {
@@ -50,7 +49,7 @@ func (c *Comparator) Send(p *serial.Port, code Code) {
 	}
 }
 
-func (c *Comparator) Listen(p *serial.Port) {
+func (c *Comparator) Listen(ch chan string, p *serial.Port) {
 	buf := make([]byte, 1)
 	var measure []byte
 
@@ -60,7 +59,8 @@ func (c *Comparator) Listen(p *serial.Port) {
 			log.Fatal(err)
 		}
 		if buf[0] == '\n' {
-			log.Println("measure " + string(measure))
+			log.Println("write inside channel")
+			ch <- string(measure)
 			measure = nil
 		} else {
 			measure = append(measure, buf[0])
