@@ -13,7 +13,7 @@ func NewHandler(s *service.Service) *Handler {
 	return &Handler{s}
 }
 
-func (h *Handler) InitRoutes() *gin.Engine {
+func (h Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
 	router.GET("/scan-com-ports", h.listPorts)

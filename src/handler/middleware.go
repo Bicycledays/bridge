@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"github.com/bicycledays/bridge/src/service"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -11,12 +11,9 @@ const (
 )
 
 func (h *Handler) comparatorIdentity(c *gin.Context) {
-	var comparator service.Comparator
-	if err := c.BindJSON(&comparator); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Ошибка парсинга параметров компаратора", err.Error())
-		return
-	}
-	portName, err := h.service.CheckComparator(&comparator)
+	js, err := c.GetRawData()
+	log.Println(string(js))
+	portName, err := h.service.CheckComparator(js)
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "Ошибка проверки компаратора", err.Error())
 		return

@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
-	"github.com/bicycledays/bridge/src/service"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
@@ -21,6 +19,12 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
+func newErrorSocketResponse(ws *websocket.Conn, message string) {
+	closeMessage := websocket.FormatCloseMessage(websocket.CloseNormalClosure, message)
+	_ = ws.WriteMessage(websocket.CloseMessage, closeMessage)
+	_ = ws.Close()
+}
+
 func (h *Handler) measure(c *gin.Context) {
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -29,57 +33,46 @@ func (h *Handler) measure(c *gin.Context) {
 	}
 
 	log.Println("Client Connected", c.ClientIP())
-	err = ws.WriteMessage(1, []byte("OK"))
+	err = ws.WriteMessage(websocket.TextMessage, []byte("OK"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "Ошибка при ответе клиенту", err.Error())
 		return
 	}
 
 	_, message, _ := ws.ReadMessage()
-	var comparator service.Comparator
-	err = json.Unmarshal(message, &comparator)
+	var portName string
+	portName, err = h.service.CheckComparator(message)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Ошибка парсинга параметров компаратора", err.Error())
+		newErrorSocketResponse(ws, "comparator parameters are not valid:"+err.Error())
 		return
 	}
-	_, err = h.service.CheckComparator(&comparator)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Параметры компаратора не валидны", err.Error())
-		return
-	}
-
-	var measure []byte
+	comparator := h.service.Comparators[portName]
+	err = ws.WriteMessage(websocket.TextMessage, []byte("OK"))
 	port := comparator.OpenPort()
-	ch := make(chan []byte)
-	go comparator.Listen(ch, port)
-	go func() {
-		tick := time.NewTicker(time.Millisecond * 500)
-		defer tick.Stop()
-		for {
 
-		}
+	comparator.Subscribers++
+	log.Println("Subscribers++")
+	log.Println(comparator.Subscribers)
+	if comparator.Subscribers == 1 {
+		go comparator.Listen(port)
+		go comparator.SendWhileListing(port)
+	}
+	defer func() {
+		comparator.Subscribers--
+		log.Println("Subscribers--")
+		log.Println(comparator.Subscribers)
 	}()
 
+	ticker := time.NewTicker(time.Millisecond * 500)
 	for {
-		err := comparator.Send(port, service.Print)
-		if err != nil {
-			newErrorResponse(
-				c,
-				http.StatusInternalServerError,
-				"Ошибка при передаче команды на компаратор",
-				err.Error(),
-			)
-			return
-		}
-		measure = <-ch
-		if err := ws.WriteMessage(websocket.TextMessage, measure); err != nil {
-			newErrorResponse(
-				c,
-				http.StatusInternalServerError,
-				"Ошибка при передаче сообщения по сокетам",
-				err.Error(),
-			)
-			return
+		<-ticker.C
+		if comparator.Display != nil {
+			message = comparator.Display
+			err = ws.WriteMessage(websocket.TextMessage, message)
+			if err != nil {
+				newErrorSocketResponse(ws, "Ошибка при передаче сообщения по сокетам")
+				return
+			}
 		}
 	}
 }

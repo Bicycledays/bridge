@@ -1,14 +1,17 @@
 package service
 
 import (
-	"encoding/json"
 	"github.com/tarm/serial"
 	"log"
+	"strconv"
+	"time"
 )
 
 type Comparator struct {
-	Config  *serial.Config  `json:"config"`
-	License *LicenseService `json:"license"`
+	Config      *serial.Config `json:"config"`
+	Params      *Params        `json:"params"`
+	Display     []byte
+	Subscribers int
 }
 
 type Code byte
@@ -23,8 +26,8 @@ const (
 
 func NewComparator() *Comparator {
 	return &Comparator{
-		Config:  nil,
-		License: nil,
+		Config: nil,
+		Params: nil,
 	}
 }
 
@@ -50,39 +53,48 @@ func (c *Comparator) Send(p *serial.Port, code Code) error {
 	return nil
 }
 
-func (c *Comparator) Listen(ch chan []byte, p *serial.Port) {
+func (c *Comparator) SendWhileListing(p *serial.Port) {
+	ticker := time.NewTicker(time.Millisecond * 500)
+	defer ticker.Stop()
+	var err error
+	for c.Subscribers > 0 {
+		err = c.Send(p, Print)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		<-ticker.C
+	}
+}
+
+func (c *Comparator) Listen(p *serial.Port) {
 	buf := make([]byte, 1)
 	var measure []byte
 
-	for {
+	for c.Subscribers > 0 {
 		_, err := p.Read(buf)
 		if err != nil {
 			log.Fatal(err)
 		}
 		if buf[0] == '\n' {
-			log.Println("write inside channel")
-			select {
-			case ch <- measure:
-				measure = nil
-			default:
-				return
-			}
+			log.Println(string(measure))
+			c.Display = measure
+			measure = nil
 		} else {
 			measure = append(measure, buf[0])
 		}
 	}
+
+	c.Display = nil
 }
 
 func (c *Comparator) isValidKey() bool {
-	l := make(map[string]string, 3)
-	l["model"] = c.License.Model
-	l["factoryNumber"] = c.License.Number
-	l["licenseTerm"] = c.License.Term
-	js, err := json.Marshal(l)
-	if err != nil {
+	log.Println(c)
+	if c.Params == nil {
 		return false
 	}
-	k := encrypt(string(js))
-	log.Println(k != c.License.Key)
-	return k == c.License.Key
+	s := c.Params.Number + "%" + strconv.Itoa(c.Params.Id) + "%" + c.Params.Term
+	k := encrypt(s)
+	log.Println(k)
+	log.Println(c.Params.Key)
+	return k == c.Params.Key
 }

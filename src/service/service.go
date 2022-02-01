@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/tarm/serial"
 )
@@ -29,14 +30,19 @@ func NewService() *Service {
 	}
 }
 
-func (s *Service) CheckComparator(c *Comparator) (portName string, err error) {
+func (s *Service) CheckComparator(js []byte) (portName string, err error) {
+	var c Comparator
+	err = json.Unmarshal(js, &c)
+	if err != nil {
+		return "", errors.New("comparator parsing error:" + err.Error())
+	}
 	if !c.isValidKey() {
 		return "", errors.New("license key is not valid")
 	}
 	portName = c.Config.Name
 	_, ok := s.Comparators[portName]
 	if !ok {
-		s.Comparators[c.Config.Name] = c
+		s.Comparators[c.Config.Name] = &c
 	}
 	return portName, nil
 }
