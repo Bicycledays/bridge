@@ -23,6 +23,8 @@ func (h Handler) InitRoutes() *gin.Engine {
 	{
 		api.GET("/print", h.print)
 		api.GET("/tare", h.tare)
+		api.GET("/f2", h.f2)
+		api.GET("/platform", h.platform)
 	}
 
 	return router

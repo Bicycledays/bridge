@@ -45,3 +45,39 @@ func (h *Handler) tare(c *gin.Context) {
 	}
 	newResultResponse(c, nil)
 }
+
+func (h *Handler) f2(c *gin.Context) {
+	portName, _ := c.Get(comparatorCtx)
+	comparator := h.service.Comparators[portName.(string)]
+	port := comparator.OpenPort()
+
+	err := comparator.Send(port, service.Cover)
+	if err != nil {
+		newErrorResponse(
+			c,
+			http.StatusInternalServerError,
+			"Ошибка при передаче команды на компаратор",
+			err.Error(),
+		)
+		return
+	}
+	newResultResponse(c, nil)
+}
+
+func (h *Handler) platform(c *gin.Context) {
+	portName, _ := c.Get(comparatorCtx)
+	comparator := h.service.Comparators[portName.(string)]
+	port := comparator.OpenPort()
+
+	err := comparator.Send(port, service.Platform)
+	if err != nil {
+		newErrorResponse(
+			c,
+			http.StatusInternalServerError,
+			"Ошибка при передаче команды на компаратор",
+			err.Error(),
+		)
+		return
+	}
+	newResultResponse(c, nil)
+}

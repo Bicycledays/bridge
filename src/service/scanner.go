@@ -5,6 +5,7 @@ import (
 	"github.com/hedhyw/Go-Serial-Detector/pkg/v1/serialdet"
 	"log"
 	"runtime"
+	"strconv"
 )
 
 type Port struct {
@@ -96,12 +97,11 @@ func (c *Computer) scanLinux() []*Port {
 		ports = append(ports, &port)
 	}
 
-	if len(ports) == 0 {
-		ports = append(ports, &Port{
-			Name:   "/dev/ttyUSB0",
-			IsBusy: true,
-		})
-	}
+	index := len(ports)
+	ports = append(ports, &Port{
+		Name:   "/dev/ttyUSB" + strconv.Itoa(index),
+		IsBusy: false,
+	})
 
 	return ports
 }
