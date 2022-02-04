@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"github.com/hedhyw/Go-Serial-Detector/pkg/v1/serialdet"
 	"log"
@@ -26,13 +27,17 @@ func (c *Computer) GetPorts() []*Port {
 	return c.Ports
 }
 
-func (c *Computer) RefreshPorts() {
-	scanner := c.getScanner()
-	c.Ports = scanner()
+func (c *Computer) RefreshPorts() error {
+	ports, err := c.getScanner()
+	if err != nil {
+		return err
+	}
+	c.Ports = ports
+	return nil
 }
 
-func (c *Computer) getScanner() func() []*Port {
-	var scanner func() []*Port
+func (c *Computer) getScanner() ([]*Port, error) {
+	var scanner func() ([]*Port, error)
 
 	switch c.System {
 	case "windows":
@@ -42,13 +47,13 @@ func (c *Computer) getScanner() func() []*Port {
 	case "ios":
 		scanner = c.scanMac
 	default:
-		panic(fmt.Sprintf("Операционая система %s", c.System))
+		return nil, errors.New(fmt.Sprintf("unidentified operating system %s", c.System))
 	}
 
-	return scanner
+	return scanner()
 }
 
-func (c *Computer) scanWindows() []*Port {
+func (c *Computer) scanWindows() ([]*Port, error) {
 	// todo
 	//k, err := registry.OpenKey(registry.LOCAL_MACHINE, `HARDWARE\\DEVICEMAP\\SERIALCOMM`, registry.QUERY_VALUE)
 	//if err != nil {
@@ -79,16 +84,16 @@ func (c *Computer) scanWindows() []*Port {
 	//}
 	//
 	//fmt.Printf("%s \n", kvalue)
-	return make([]*Port, 0)
+	return nil, nil
 }
 
-func (c *Computer) scanLinux() []*Port {
+func (c *Computer) scanLinux() ([]*Port, error) {
 	var port Port
 	var ports []*Port
 
 	list, err := serialdet.List()
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 
 	for _, p := range list {
@@ -103,10 +108,10 @@ func (c *Computer) scanLinux() []*Port {
 		IsBusy: false,
 	})
 
-	return ports
+	return ports, nil
 }
 
-func (c *Computer) scanMac() []*Port {
+func (c *Computer) scanMac() ([]*Port, error) {
 	// todo
-	return make([]*Port, 0)
+	return nil, nil
 }

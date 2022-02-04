@@ -14,7 +14,7 @@ type ComparatorService interface {
 }
 
 type Scanner interface {
-	RefreshPorts()
+	RefreshPorts() error
 	GetPorts() []*Port
 }
 
