@@ -10,8 +10,8 @@ import (
 type Comparator struct {
 	Config      *serial.Config `json:"config"`
 	Params      *Params        `json:"params"`
-	Display     []byte
-	Subscribers int
+	Display     []byte         `json:"-"`
+	Subscribers int            `json:"-"`
 }
 
 type Code byte

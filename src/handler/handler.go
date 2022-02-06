@@ -13,7 +13,7 @@ func NewHandler(s *service.Service) *Handler {
 	return &Handler{s}
 }
 
-func (h Handler) InitRoutes() *gin.Engine {
+func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
 	router.GET("/scan-com-ports", h.listPorts)
@@ -21,10 +21,10 @@ func (h Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api", h.comparatorIdentity)
 	{
-		api.GET("/print", h.print)
-		api.GET("/tare", h.tare)
-		api.GET("/f2", h.f2)
-		api.GET("/platform", h.platform)
+		api.POST("/print", h.print)
+		api.POST("/tare", h.tare)
+		api.POST("/f2", h.f2)
+		api.POST("/platform", h.platform)
 	}
 
 	return router

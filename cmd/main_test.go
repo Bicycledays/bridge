@@ -1,22 +1,85 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/bicycledays/bridge/src/handler"
 	"github.com/bicycledays/bridge/src/service"
+	"github.com/gorilla/websocket"
+	"github.com/tarm/serial"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 )
 
-func getTestServer() *httptest.Server {
+func newTestServer(t *testing.T) *httptest.Server {
+	t.Helper()
+
 	s := service.NewService()
 	h := handler.NewHandler(s)
 	return httptest.NewServer(h.InitRoutes())
 }
 
+func newTestWSServer(t *testing.T, route string) *websocket.Conn {
+	t.Helper()
+
+	ts := newTestServer(t)
+	defer ts.Close()
+
+	wsURL, err := url.Parse(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wsURL.Scheme = "ws"
+	u := wsURL.String() + route
+	log.Println(u)
+
+	ws, _, err := websocket.DefaultDialer.Dial(u, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return ws
+}
+
+func newTestComparator(t *testing.T) *service.Comparator {
+	t.Helper()
+
+	return &service.Comparator{
+		Config: &serial.Config{
+			Name:     "/dev/ttyUSB0",
+			Baud:     1200,
+			Size:     7,
+			Parity:   79,
+			StopBits: 1,
+		},
+		Params: &service.Params{
+			Id:     1,
+			Number: "qwerty",
+			Term:   "2022-02-05",
+			Key:    "717765727479253125323032322d30322d3035",
+		},
+	}
+}
+
+func packComparatorToJson(t *testing.T) []byte {
+	t.Helper()
+
+	c := newTestComparator(t)
+	js, err := json.Marshal(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return js
+}
+
 func checkResponse(t *testing.T, resp *http.Response) {
+	t.Helper()
+
 	// status
 	if resp.StatusCode != 200 {
 		t.Fatalf("status code: %v", resp.StatusCode)
@@ -58,7 +121,7 @@ func checkResponse(t *testing.T, resp *http.Response) {
 }
 
 func TestListPortsRoute(t *testing.T) {
-	ts := getTestServer()
+	ts := newTestServer(t)
 	defer ts.Close()
 
 	resp, err := http.Get(ts.URL + "/scan-com-ports")
@@ -66,4 +129,67 @@ func TestListPortsRoute(t *testing.T) {
 		t.Fatalf("request error, got: %v", err)
 	}
 	checkResponse(t, resp)
+}
+
+func TestApiPrintRoute(t *testing.T) {
+	ts := newTestServer(t)
+	defer ts.Close()
+
+	js := packComparatorToJson(t)
+	resp, err := http.Post(ts.URL+"/api/print", "application/json", bytes.NewBuffer(js))
+	if err != nil {
+		t.Fatalf("request error, got: %v", err)
+	}
+	checkResponse(t, resp)
+}
+
+func TestApiTareRoute(t *testing.T) {
+	ts := newTestServer(t)
+	defer ts.Close()
+
+	js := packComparatorToJson(t)
+	resp, err := http.Post(ts.URL+"/api/tare", "application/json", bytes.NewBuffer(js))
+	if err != nil {
+		t.Fatalf("request error, got: %v", err)
+	}
+	checkResponse(t, resp)
+}
+
+func TestApiF2Route(t *testing.T) {
+	ts := newTestServer(t)
+	defer ts.Close()
+
+	js := packComparatorToJson(t)
+	resp, err := http.Post(ts.URL+"/api/f2", "application/json", bytes.NewBuffer(js))
+	if err != nil {
+		t.Fatalf("request error, got: %v", err)
+	}
+	checkResponse(t, resp)
+}
+
+func TestApiPlatformRoute(t *testing.T) {
+	ts := newTestServer(t)
+	defer ts.Close()
+
+	js := packComparatorToJson(t)
+	resp, err := http.Post(ts.URL+"/api/platform", "application/json", bytes.NewBuffer(js))
+	if err != nil {
+		t.Fatalf("request error, got: %v", err)
+	}
+	checkResponse(t, resp)
+}
+
+func TestMeasureRoute(t *testing.T) {
+	ws := newTestWSServer(t, "/measure")
+	defer func(ws *websocket.Conn) {
+		err := ws.Close()
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+	}(ws)
+
+	js := packComparatorToJson(t)
+	if err := ws.WriteMessage(websocket.TextMessage, js); err != nil {
+		t.Fatalf("%v", err)
+	}
 }
