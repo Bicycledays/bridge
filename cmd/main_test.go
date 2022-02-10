@@ -57,7 +57,7 @@ func newTestComparator(t *testing.T) *service.Comparator {
 			StopBits: 1,
 		},
 		Params: &service.Params{
-			Id:     1,
+			Model:  "1",
 			Number: "qwerty",
 			Term:   "2022-02-05",
 			Key:    "717765727479253125323032322d30322d3035",

@@ -1,12 +1,5 @@
 package main
 
-/*
-	1200 бит/с
-	паритет нечётный
-	7 бит
-	1 стоповый
-*/
-
 import (
 	"github.com/bicycledays/bridge/src/handler"
 	"github.com/bicycledays/bridge/src/server"

@@ -7,7 +7,7 @@ import (
 const key = "indinsindinsindi"
 
 type Params struct {
-	Id     int    `json:"id"`
+	Model  string `json:"model"`
 	Number string `json:"factoryNumber"`
 	Term   string `json:"licenseTerm"`
 	Key    string `json:"licenseKey"`

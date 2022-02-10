@@ -3,6 +3,8 @@ package handler
 import (
 	"github.com/bicycledays/bridge/src/service"
 	"github.com/gin-gonic/gin"
+	cors "github.com/itsjamie/gin-cors"
+	"time"
 )
 
 type Handler struct {
@@ -15,6 +17,16 @@ func NewHandler(s *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	router.Use(cors.Middleware(cors.Config{
+		Origins:         "*",
+		Methods:         "GET, PUT, POST, DELETE",
+		RequestHeaders:  "Origin, Authorization, Content-Type",
+		ExposedHeaders:  "",
+		MaxAge:          50 * time.Second,
+		Credentials:     true,
+		ValidateHeaders: false,
+	}))
 
 	router.GET("/scan-com-ports", h.listPorts)
 	router.GET("/measure", h.measure)

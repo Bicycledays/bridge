@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/tarm/serial"
 	"log"
-	"strconv"
 	"time"
 )
 
@@ -92,9 +91,10 @@ func (c *Comparator) isValidKey() bool {
 	if c.Params == nil {
 		return false
 	}
-	s := c.Params.Number + "%" + strconv.Itoa(c.Params.Id) + "%" + c.Params.Term
+	s := c.Params.Number + "%" + c.Params.Model + "%" + c.Params.Term
 	k := encrypt(s)
 	log.Println(k)
 	log.Println(c.Params.Key)
+	log.Println(k == c.Params.Key)
 	return k == c.Params.Key
 }
