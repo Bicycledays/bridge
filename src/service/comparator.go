@@ -30,12 +30,12 @@ func NewComparator() *Comparator {
 	}
 }
 
-func (c *Comparator) OpenPort() *serial.Port {
+func (c *Comparator) OpenPort() (*serial.Port, error) {
 	p, err := serial.OpenPort(c.Config)
 	if err != nil {
-		log.Fatalln(err.Error())
+		return nil, err
 	}
-	return p
+	return p, nil
 }
 
 /*
@@ -72,7 +72,8 @@ func (c *Comparator) Listen(p *serial.Port) {
 	for c.Subscribers > 0 {
 		_, err := p.Read(buf)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			break
 		}
 		if buf[0] == '\n' {
 			log.Println(string(measure))

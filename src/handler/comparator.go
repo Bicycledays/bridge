@@ -10,7 +10,11 @@ import (
 func (h *Handler) print(c *gin.Context) {
 	portName, _ := c.Get(comparatorCtx)
 	comparator := h.service.Comparators[portName.(string)]
-	port := comparator.OpenPort()
+	port, err := comparator.OpenPort()
+	if err != nil {
+		newErrorResponse(c, 400, "open serial port error", err.Error())
+		return
+	}
 	comparator.Subscribers++
 	log.Println("Subscribers++")
 	log.Println(comparator.Subscribers)
@@ -31,9 +35,13 @@ func (h *Handler) print(c *gin.Context) {
 func (h *Handler) tare(c *gin.Context) {
 	portName, _ := c.Get(comparatorCtx)
 	comparator := h.service.Comparators[portName.(string)]
-	port := comparator.OpenPort()
+	port, err := comparator.OpenPort()
+	if err != nil {
+		newErrorResponse(c, 400, "open serial port error", err.Error())
+		return
+	}
 
-	err := comparator.Send(port, service.Tare)
+	err = comparator.Send(port, service.Tare)
 	if err != nil {
 		newErrorResponse(
 			c,
@@ -49,9 +57,13 @@ func (h *Handler) tare(c *gin.Context) {
 func (h *Handler) f2(c *gin.Context) {
 	portName, _ := c.Get(comparatorCtx)
 	comparator := h.service.Comparators[portName.(string)]
-	port := comparator.OpenPort()
+	port, err := comparator.OpenPort()
+	if err != nil {
+		newErrorResponse(c, 400, "open serial port error", err.Error())
+		return
+	}
 
-	err := comparator.Send(port, service.Cover)
+	err = comparator.Send(port, service.Cover)
 	if err != nil {
 		newErrorResponse(
 			c,
@@ -67,9 +79,13 @@ func (h *Handler) f2(c *gin.Context) {
 func (h *Handler) platform(c *gin.Context) {
 	portName, _ := c.Get(comparatorCtx)
 	comparator := h.service.Comparators[portName.(string)]
-	port := comparator.OpenPort()
+	port, err := comparator.OpenPort()
+	if err != nil {
+		newErrorResponse(c, 400, "open serial port error", err.Error())
+		return
+	}
 
-	err := comparator.Send(port, service.Platform)
+	err = comparator.Send(port, service.Platform)
 	if err != nil {
 		newErrorResponse(
 			c,

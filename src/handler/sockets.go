@@ -48,7 +48,11 @@ func (h *Handler) measure(c *gin.Context) {
 	}
 	comparator := h.service.Comparators[portName]
 	err = ws.WriteMessage(websocket.TextMessage, []byte("OK"))
-	port := comparator.OpenPort()
+	port, err := comparator.OpenPort()
+	if err != nil {
+		newErrorSocketResponse(ws, "open serial port error:"+err.Error())
+		return
+	}
 
 	comparator.Subscribers++
 	log.Println("Subscribers++")
