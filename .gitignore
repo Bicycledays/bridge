@@ -2,3 +2,4 @@
 /.idea
 /var
 /cmd/bin/main
+/vendor/
