@@ -88,7 +88,7 @@ func (c *Comparator) Listen(p *serial.Port) {
 }
 
 func (c *Comparator) isValidKey() bool {
-	log.Println(c)
+	log.Println(*c)
 	if c.Params == nil {
 		return false
 	}
