@@ -36,7 +36,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		api.POST("/print", h.print)
 		api.POST("/tare", h.tare)
 		api.POST("/f2", h.f2)
-		api.POST("/platform", h.platform)
+		api.POST("/f5", h.f5)
+		api.POST("/f6", h.f6)
 	}
 
 	return router

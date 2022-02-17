@@ -13,16 +13,6 @@ type Comparator struct {
 	Subscribers int            `json:"-"`
 }
 
-type Code byte
-
-const (
-	Esc      Code = 27  // ESC
-	Tare     Code = 'T' // тарирование или установка на ноль
-	Print    Code = 'P' // печать
-	Cover    Code = 'X'
-	Platform Code = 'Y'
-)
-
 func NewComparator() *Comparator {
 	return &Comparator{
 		Config: nil,
@@ -38,14 +28,9 @@ func (c *Comparator) OpenPort() (*serial.Port, error) {
 	return p, nil
 }
 
-/*
-	Передача команды на компаратор
-*/
-func (c *Comparator) Send(p *serial.Port, code Code) error {
-	buf := make([]byte, 2)
-	buf[0] = byte(Esc)
-	buf[1] = byte(code)
-	_, err := p.Write(buf)
+// Send Передача команды на компаратор
+func (c *Comparator) Send(p *serial.Port, command Command) error {
+	_, err := p.Write(command.message())
 	if err != nil {
 		return err
 	}
@@ -55,9 +40,14 @@ func (c *Comparator) Send(p *serial.Port, code Code) error {
 func (c *Comparator) SendWhileListing(p *serial.Port) {
 	ticker := time.NewTicker(time.Millisecond * 500)
 	defer ticker.Stop()
-	var err error
+
+	command := Command{
+		Format: 1,
+		Symbol: Print,
+	}
+
 	for c.Subscribers > 0 {
-		err = c.Send(p, Print)
+		err := c.Send(p, command)
 		if err != nil {
 			log.Println(err.Error())
 		}
