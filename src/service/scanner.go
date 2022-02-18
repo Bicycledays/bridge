@@ -3,10 +3,9 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/hedhyw/Go-Serial-Detector/pkg/v1/serialdet"
-	"log"
+	"go.bug.st/serial.v1"
 	"runtime"
-	"strconv"
+	"strings"
 )
 
 type Port struct {
@@ -88,30 +87,34 @@ func (c *Computer) scanWindows() ([]*Port, error) {
 }
 
 func (c *Computer) scanLinux() ([]*Port, error) {
-	var port Port
-	var ports []*Port
-
-	list, err := serialdet.List()
+	result, err := serial.GetPortsList()
 	if err != nil {
 		return nil, err
 	}
-
-	for _, p := range list {
-		port = Port{Name: p.Path(), IsBusy: false}
-		log.Println(port)
-		ports = append(ports, &port)
-	}
-
-	index := len(ports)
-	ports = append(ports, &Port{
-		Name:   "/dev/ttyUSB" + strconv.Itoa(index),
-		IsBusy: false,
-	})
+	ports := filterPorts(result, "ttyUSB")
 
 	return ports, nil
 }
 
 func (c *Computer) scanMac() ([]*Port, error) {
-	// todo
-	return nil, nil
+	result, err := serial.GetPortsList()
+	if err != nil {
+		return nil, err
+	}
+	ports := filterPorts(result, "tty.usbserial")
+
+	return ports, nil
+}
+
+func filterPorts(portsList []string, sign string) (ports []*Port) {
+	for _, p := range portsList {
+		if strings.Contains(p, sign) {
+			ports = append(ports, &Port{
+				Name:   p,
+				IsBusy: true,
+			})
+		}
+	}
+
+	return ports
 }
