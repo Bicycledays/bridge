@@ -8,7 +8,7 @@ import (
 
 type ComparatorService interface {
 	OpenPort() *serial.Port
-	Send(p *serial.Port, code Code)
+	Send(p *serial.Port, command Command)
 	Listen(ch chan string, p *serial.Port)
 	isValidKey() bool
 }

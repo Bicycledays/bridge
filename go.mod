@@ -6,6 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/gorilla/websocket v1.4.2
 	github.com/hedhyw/Go-Serial-Detector v1.0.0-rc1
+	github.com/itsjamie/gin-cors v0.0.0-20160420130702-97b4a9da7933
 	github.com/joho/godotenv v1.3.0
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
 )
@@ -16,7 +17,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/itsjamie/gin-cors v0.0.0-20160420130702-97b4a9da7933 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
