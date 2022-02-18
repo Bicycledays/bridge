@@ -44,6 +44,7 @@ func (c *Computer) getScanner() ([]*Port, error) {
 	case "linux":
 		scanner = c.scanLinux
 	case "ios":
+	case "darwin":
 		scanner = c.scanMac
 	default:
 		return nil, errors.New(fmt.Sprintf("unidentified operating system %s", c.System))
