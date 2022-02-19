@@ -28,8 +28,6 @@ github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
-github.com/hedhyw/Go-Serial-Detector v1.0.0-rc1 h1:711NlOyZRHTfPCkK+ohh86eUPDL12Hi3MmGxtRkdKio=
-github.com/hedhyw/Go-Serial-Detector v1.0.0-rc1/go.mod h1:KHHkQDsf164J6M+mloiKeohRoEUF0Gbb2PjnB+I/nb8=
 github.com/itsjamie/gin-cors v0.0.0-20160420130702-97b4a9da7933 h1:USSH71GEMLF/yxfkbDMvmklaimVh9cXbBVcQZ4AgJPE=
 github.com/itsjamie/gin-cors v0.0.0-20160420130702-97b4a9da7933/go.mod h1:AYdLvrSBFloDBNt7Y8xkQ6gmhCODGl8CPikjyIOnNzA=
 github.com/joho/godotenv v1.3.0 h1:Zjp+RcGpHhGlrMbJzXTrZZPrWj+1vfm90La1wgB6Bhc=

@@ -26,6 +26,9 @@ func (h *Handler) print(c *gin.Context) {
 		comparator.Subscribers--
 		log.Println("Subscribers--")
 		log.Println(comparator.Subscribers)
+		if comparator.Subscribers == 0 {
+			_ = port.Close()
+		}
 	}()
 	for comparator.Display == nil {
 	}
@@ -40,6 +43,11 @@ func (h *Handler) tare(c *gin.Context) {
 		newErrorResponse(c, 400, "open serial port error", err.Error())
 		return
 	}
+	defer func() {
+		if comparator.Subscribers == 0 {
+			_ = port.Close()
+		}
+	}()
 
 	err = comparator.Send(port, service.Command{
 		Format: 1,
@@ -66,6 +74,11 @@ func (h *Handler) f2(c *gin.Context) {
 		newErrorResponse(c, 400, "open serial port error", err.Error())
 		return
 	}
+	defer func() {
+		if comparator.Subscribers == 0 {
+			_ = port.Close()
+		}
+	}()
 
 	err = comparator.Send(port, service.Command{
 		Format: 2,
@@ -93,6 +106,11 @@ func (h *Handler) f5(c *gin.Context) {
 		newErrorResponse(c, 400, "open serial port error", err.Error())
 		return
 	}
+	defer func() {
+		if comparator.Subscribers == 0 {
+			_ = port.Close()
+		}
+	}()
 
 	err = comparator.Send(port, service.Command{
 		Format: 2,
@@ -120,6 +138,11 @@ func (h *Handler) f6(c *gin.Context) {
 		newErrorResponse(c, 400, "open serial port error", err.Error())
 		return
 	}
+	defer func() {
+		if comparator.Subscribers == 0 {
+			_ = port.Close()
+		}
+	}()
 
 	err = comparator.Send(port, service.Command{
 		Format: 2,

@@ -53,6 +53,11 @@ func (c *Comparator) SendWhileListing(p *serial.Port) {
 		}
 		<-ticker.C
 	}
+
+	err := p.Close()
+	if err != nil {
+		log.Println("close inside sender error", err.Error())
+	}
 }
 
 func (c *Comparator) Listen(p *serial.Port) {

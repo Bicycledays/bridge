@@ -65,6 +65,9 @@ func (h *Handler) measure(c *gin.Context) {
 		comparator.Subscribers--
 		log.Println("Subscribers--")
 		log.Println(comparator.Subscribers)
+		if comparator.Subscribers == 0 {
+			_ = port.Close()
+		}
 	}()
 
 	ticker := time.NewTicker(time.Millisecond * 500)
