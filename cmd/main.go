@@ -13,7 +13,7 @@ func main() {
 	envInit()
 	port, found := os.LookupEnv("LOCAL_PORT")
 	if !found {
-		port = "8080"
+		port = "48700"
 	}
 	s := service.NewService()
 	h := handler.NewHandler(s)
@@ -24,7 +24,7 @@ func main() {
 }
 
 func envInit() {
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load("../.env"); err != nil {
 		log.Print("No .env file found")
 	}
 }
