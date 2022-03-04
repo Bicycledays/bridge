@@ -167,12 +167,24 @@ func TestApiF2Route(t *testing.T) {
 	checkResponse(t, resp)
 }
 
-func TestApiPlatformRoute(t *testing.T) {
+func TestApiF5Route(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
 
 	js := packComparatorToJson(t)
-	resp, err := http.Post(ts.URL+"/api/platform", "application/json", bytes.NewBuffer(js))
+	resp, err := http.Post(ts.URL+"/api/f5", "application/json", bytes.NewBuffer(js))
+	if err != nil {
+		t.Fatalf("request error, got: %v", err)
+	}
+	checkResponse(t, resp)
+}
+
+func TestApiF6Route(t *testing.T) {
+	ts := newTestServer(t)
+	defer ts.Close()
+
+	js := packComparatorToJson(t)
+	resp, err := http.Post(ts.URL+"/api/f6", "application/json", bytes.NewBuffer(js))
 	if err != nil {
 		t.Fatalf("request error, got: %v", err)
 	}

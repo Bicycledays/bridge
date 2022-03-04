@@ -92,5 +92,9 @@ func (c *Comparator) isValidKey() bool {
 	log.Println(k)
 	log.Println(c.Params.Key)
 	log.Println(k == c.Params.Key)
-	return k == c.Params.Key
+
+	today := time.Now()
+	term, err := time.Parse("2006-01-02", c.Params.Term)
+
+	return err == nil && term.After(today) && k == c.Params.Key
 }

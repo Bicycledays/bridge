@@ -4,8 +4,6 @@ import (
 	"encoding/hex"
 )
 
-const key = "indinsindinsindi"
-
 type Params struct {
 	Model  string `json:"model"`
 	Number string `json:"factoryNumber"`
