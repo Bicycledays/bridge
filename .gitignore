@@ -3,3 +3,4 @@
 /var
 /cmd/bin/main
 /vendor/
+.env
