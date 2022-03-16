@@ -69,6 +69,7 @@ func (h *Handler) measure(c *gin.Context) {
 			_ = port.Close()
 		}
 	}()
+	go interruptListener(ws)
 
 	ticker := time.NewTicker(time.Millisecond * 500)
 	for {
@@ -80,6 +81,21 @@ func (h *Handler) measure(c *gin.Context) {
 				newErrorSocketResponse(ws, "Ошибка при передаче сообщения по сокетам")
 				return
 			}
+		}
+	}
+}
+
+func interruptListener(ws *websocket.Conn) {
+	for {
+		if ws != nil {
+			_, message, _ := ws.ReadMessage()
+			log.Println("message from client", string(message))
+			if string(message) == "stop" {
+				newErrorSocketResponse(ws, "Good Bye!")
+				return
+			}
+		} else {
+			return
 		}
 	}
 }

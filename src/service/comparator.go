@@ -56,7 +56,7 @@ func (c *Comparator) SendWhileListing(p *serial.Port) {
 
 	err := p.Close()
 	if err != nil {
-		log.Println("close inside sender error", err.Error())
+		log.Println("notice:", err.Error())
 	}
 }
 
