@@ -29,6 +29,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	}))
 
 	router.GET("/scan-com-ports", h.listPorts)
+	router.GET("/ping", h.ping)
 	router.GET("/measure", h.measure)
 
 	api := router.Group("/api", h.comparatorIdentity)
