@@ -6,7 +6,7 @@ import (
 
 func (h *Handler) listPorts(c *gin.Context) {
 	err := h.service.Scanner.RefreshPorts()
-	if err != nil {
+	if err != nil && err.Error() != "Could not enumerate serial ports" {
 		newErrorResponse(c, 400, "refresh ports list error", err.Error())
 		return
 	}

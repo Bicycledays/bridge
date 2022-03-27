@@ -1,6 +1,9 @@
 package service
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
 	"github.com/tarm/serial"
 	"log"
 	"time"
@@ -97,4 +100,16 @@ func (c *Comparator) isValidKey() bool {
 	term, err := time.Parse("2006-01-02", c.Params.Term)
 
 	return err == nil && term.After(today) && k == c.Params.Key
+}
+
+func (c *Comparator) hashConfig() (string, error) {
+
+	config, err := json.Marshal(c.Config)
+	if err != nil {
+		log.Println("hashing config error", err.Error())
+		return "", err
+	}
+
+	hmd5 := md5.Sum(config)
+	return hex.EncodeToString(hmd5[:]), nil
 }

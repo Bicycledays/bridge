@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tarm/serial"
+	"log"
 )
 
 type ComparatorService interface {
@@ -30,7 +31,7 @@ func NewService() *Service {
 	}
 }
 
-func (s *Service) CheckComparator(js []byte) (portName string, err error) {
+func (s *Service) CheckComparator(js []byte) (hash string, err error) {
 	var c Comparator
 	err = json.Unmarshal(js, &c)
 	if err != nil {
@@ -39,10 +40,16 @@ func (s *Service) CheckComparator(js []byte) (portName string, err error) {
 	if !c.isValidKey() {
 		return "", errors.New("license key is not valid")
 	}
-	portName = c.Config.Name
-	_, ok := s.Comparators[portName]
-	if !ok {
-		s.Comparators[c.Config.Name] = &c
+	hash, err = c.hashConfig()
+	if err != nil {
+		return "", err
 	}
-	return portName, nil
+	_, ok := s.Comparators[hash]
+	if !ok {
+		log.Println("new hash", hash)
+		s.Comparators[hash] = &c
+	} else {
+		log.Println("existed hash", hash)
+	}
+	return hash, nil
 }
