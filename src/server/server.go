@@ -20,7 +20,6 @@ func (s *Server) Run(port string, handler http.Handler) error {
 	}
 
 	return s.httpServer.ListenAndServe()
-	//return s.httpServer.ListenAndServeTLS("cert/server.pem", "cert/server.key")
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
