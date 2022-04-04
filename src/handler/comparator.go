@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"github.com/bicycledays/bridge/src/service"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"sartorius/bridge/src/service"
 )
 
 func (h *Handler) print(c *gin.Context) {

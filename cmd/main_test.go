@@ -3,8 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/bicycledays/bridge/src/handler"
-	"github.com/bicycledays/bridge/src/service"
 	"github.com/gorilla/websocket"
 	"github.com/tarm/serial"
 	"io"
@@ -12,6 +10,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"sartorius/bridge/src/handler"
+	"sartorius/bridge/src/service"
 	"testing"
 )
 

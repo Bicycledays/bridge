@@ -4,3 +4,4 @@
 /cmd/bin/main
 /vendor/
 .env
+/go.mod

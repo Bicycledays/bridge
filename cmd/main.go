@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/bicycledays/bridge/src/handler"
-	"github.com/bicycledays/bridge/src/server"
-	"github.com/bicycledays/bridge/src/service"
 	"github.com/gookit/color"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+	"sartorius/bridge/src/handler"
+	"sartorius/bridge/src/server"
+	"sartorius/bridge/src/service"
 )
 
 func main() {

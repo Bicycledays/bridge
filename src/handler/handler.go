@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"github.com/bicycledays/bridge/src/service"
 	"github.com/gin-gonic/gin"
 	cors "github.com/itsjamie/gin-cors"
+	"sartorius/bridge/src/service"
 	"time"
 )
 
@@ -25,7 +25,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		RequestHeaders:  "Origin, Authorization, Content-Type",
 		ExposedHeaders:  "",
 		MaxAge:          50 * time.Second,
-		Credentials:     true,
+		Credentials:     false,
 		ValidateHeaders: false,
 	}))
 
